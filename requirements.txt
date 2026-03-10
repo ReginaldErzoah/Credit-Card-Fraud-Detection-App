@@ -6,16 +6,24 @@ rich>=13.4.2,<15
 pandas>=2.0.3,<2.1
 numpy>=1.26.4,<1.27
 
+# Machine Learning models
+scikit-learn>=1.3.2,<2
+xgboost>=1.7.6,<2
+imbalanced-learn>=1.12.1,<2
+
 # Optional: plotting / visualization libraries
 matplotlib>=3.8.1,<4
 seaborn>=0.12.2,<0.13
-plotly>=5.16.0,<6
+shap>=1.2.3,<2
+
+# Utilities
+joblib>=1.3.2,<2
 
 # Data quality / utilities
 pyarrow>=12.0.1,<13
 openpyxl>=3.1.2,<4
 
-# Markdown rendering
+# Markdown rendering (Streamlit dependencies)
 markdown-it-py>=4.0.0,<5
 mdurl>=0.1.2,<0.2
 pygments>=2.19.2,<3
