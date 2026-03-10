@@ -1,14 +1,20 @@
-#Import libraries
+# Import libraries
 import streamlit as st
+import pandas as pd
+import numpy as np
 import joblib
+import shap
+import matplotlib.pyplot as plt
 
-# Import all libraries and classes used in your pickle
+# Import sklearn & xgboost classes used in your deployment objects
+from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
-from imblearn.ensemble import BalancedRandomForestClassifier 
 
-# Load your deployment objects
+# Load deployment objects
 deployment_objects = joblib.load("fraud_detection_deployment_objects.pkl")
+
 lr = deployment_objects["logreg"]
 rf = deployment_objects["rf"]
 xgb_model = deployment_objects["xgb"]
@@ -119,4 +125,5 @@ st.download_button(
     mime="text/csv"
 
 )
+
 
