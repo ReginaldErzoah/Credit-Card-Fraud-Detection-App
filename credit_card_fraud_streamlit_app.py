@@ -1,12 +1,17 @@
 #Import libraries
-import streamlit as st
-import pandas as pd
-import numpy as np
-import joblib
-import shap
-import matplotlib.pyplot as plt
+# app.py or credit_card_fraud_streamlit_app.py
 
-# Load deployment objects
+import streamlit as st
+import joblib
+
+# Import all libraries and classes used in your pickle
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from imblearn.ensemble import BalancedRandomForestClassifier  # if used
+# Import any custom transformers or functions used in the pipeline
+# from my_custom_module import MyCustomTransformer
+
+# Load your deployment objects
 deployment_objects = joblib.load("fraud_detection_deployment_objects.pkl")
 lr = deployment_objects["logreg"]
 rf = deployment_objects["rf"]
@@ -116,4 +121,5 @@ st.download_button(
     data=csv,
     file_name="fraud_predictions.csv",
     mime="text/csv"
+
 )
