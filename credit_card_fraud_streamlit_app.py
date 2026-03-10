@@ -28,6 +28,18 @@ rf = deployment_objects.get("rf")
 xgb_model = deployment_objects.get("xgb")
 scaler = deployment_objects.get("scaler")
 
+from pathlib import Path
+import joblib
+
+BASE_DIR = Path(__file__).parent 
+pkl_path = BASE_DIR / "fraud_detection_deployment_objects.pkl"
+
+try:
+    deployment_objects = joblib.load(pkl_path)
+except Exception as e:
+    st.error(f"Failed to load deployment objects: {e}")
+    st.stop()
+
 # -----------------------------
 # Create SHAP explainer dynamically for XGBoost
 # -----------------------------
@@ -153,3 +165,4 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
