@@ -1,4 +1,6 @@
+# -----------------------------
 # Import libraries
+# -----------------------------
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -6,7 +8,7 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 
-# Import sklearn & xgboost classes used in deployment objects
+# sklearn & xgboost classes used in deployment objects
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
@@ -27,13 +29,14 @@ xgb_model = deployment_objects.get("xgb")
 scaler = deployment_objects.get("scaler")
 
 # -----------------------------
-# Recreate SHAP explainer dynamically
+# Create SHAP explainer dynamically for XGBoost
 # -----------------------------
-try:
-    shap_xgb = shap.TreeExplainer(xgb_model)
-except Exception as e:
-    shap_xgb = None
-    st.warning(f"SHAP explainer could not be created: {e}")
+shap_xgb = None
+if xgb_model is not None:
+    try:
+        shap_xgb = shap.TreeExplainer(xgb_model)
+    except Exception as e:
+        st.warning(f"SHAP explainer could not be created: {e}")
 
 # -----------------------------
 # App title
@@ -48,7 +51,7 @@ model_map = {"Logistic Regression": lr, "Random Forest": rf, "XGBoost": xgb_mode
 model = model_map[model_choice]
 
 # -----------------------------
-# Threshold input (manual)
+# Threshold input
 # -----------------------------
 threshold_input = st.text_input("Set prediction threshold (0.0 - 1.0)", value="0.5")
 try:
@@ -59,22 +62,19 @@ try:
 except ValueError:
     st.error("Threshold must be a number")
     st.stop()
+
 st.write(f"Current threshold: {threshold:.10f}")
 
 # -----------------------------
-# Input option: manual or CSV upload
+# Input data: manual or CSV
 # -----------------------------
 st.subheader("Input transaction data")
 input_option = st.radio("Choose input method:", ["Manual Entry", "Upload CSV"])
 
-# -----------------------------
-# Features used during training
-# -----------------------------
+# Features used in training
 feature_names = ['Time'] + [f'V{i}' for i in range(1, 29)] + ['Amount']
 
-# -----------------------------
 # Prepare input DataFrame
-# -----------------------------
 if input_option == "Manual Entry":
     input_data = {feature: st.number_input(feature, value=0.0) for feature in feature_names}
     input_df = pd.DataFrame([input_data])
@@ -86,12 +86,11 @@ else:
         st.write("Preview of uploaded data:")
         st.dataframe(input_df.head())
 
-        # Check required columns
+        # Validate columns
         missing_cols = [c for c in feature_names if c not in input_df.columns]
         if missing_cols:
             st.error(f"Missing required columns: {missing_cols}")
             st.stop()
-
         extra_cols = [c for c in input_df.columns if c not in feature_names]
         if extra_cols:
             st.warning(f"Extra columns will be ignored: {extra_cols}")
@@ -101,11 +100,9 @@ else:
         st.stop()
 
 # -----------------------------
-# Add engineered 'Hour' column
+# Feature engineering: add 'Hour'
 # -----------------------------
 input_df['Hour'] = (input_df['Time'] // 3600) % 24
-
-# Ensure correct feature order (include Hour)
 feature_names_with_hour = feature_names + ['Hour']
 input_df = input_df[feature_names_with_hour]
 
@@ -113,11 +110,9 @@ input_df = input_df[feature_names_with_hour]
 # Prepare model input
 # -----------------------------
 if model_choice == "Logistic Regression":
-    # Only original features the LR was trained on
     model_input = input_df[feature_names].copy()
     scaled_input = scaler.transform(model_input)
 else:
-    # RF/XGB can use Hour
     model_input = input_df[feature_names_with_hour].copy()
     scaled_input = model_input.values  # Raw features for RF/XGB
 
@@ -128,7 +123,7 @@ pred_probs = model.predict_proba(scaled_input)[:, 1]
 pred_classes = (pred_probs >= threshold).astype(int)
 
 # -----------------------------
-# Prepare results
+# Display results
 # -----------------------------
 results = input_df.copy()
 results['Pred_Probability'] = pred_probs
@@ -138,15 +133,12 @@ st.subheader("Prediction Results")
 st.dataframe(results)
 
 # -----------------------------
-# SHAP summary plot for XGBoost only
+# SHAP summary plot (XGBoost only)
 # -----------------------------
 if model_choice == "XGBoost" and shap_xgb is not None:
     st.subheader("SHAP Summary Plot (feature importance)")
-
-    # Use only first N rows to speed up
     sample_input = input_df.head(min(50, len(input_df)))
     shap_values = shap_xgb.shap_values(sample_input)
-
     fig, ax = plt.subplots(figsize=(10, 5))
     shap.summary_plot(shap_values, sample_input, show=False)
     st.pyplot(fig)
