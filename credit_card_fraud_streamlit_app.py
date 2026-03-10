@@ -5,8 +5,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
-import shap
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 # sklearn & xgboost classes used in deployment objects
 from sklearn.linear_model import LogisticRegression
@@ -17,21 +17,7 @@ from xgboost import XGBClassifier
 # -----------------------------
 # Load deployment objects
 # -----------------------------
-try:
-    deployment_objects = joblib.load("fraud_detection_deployment_objects.pkl")
-except Exception as e:
-    st.error(f"Failed to load deployment objects: {e}")
-    st.stop()
-
-lr = deployment_objects.get("logreg")
-rf = deployment_objects.get("rf")
-xgb_model = deployment_objects.get("xgb")
-scaler = deployment_objects.get("scaler")
-
-from pathlib import Path
-import joblib
-
-BASE_DIR = Path(__file__).parent 
+BASE_DIR = Path(__file__).parent
 pkl_path = BASE_DIR / "fraud_detection_deployment_objects.pkl"
 
 try:
@@ -40,12 +26,20 @@ except Exception as e:
     st.error(f"Failed to load deployment objects: {e}")
     st.stop()
 
+# Extract objects
+lr = deployment_objects.get("logreg")
+rf = deployment_objects.get("rf")
+xgb_model = deployment_objects.get("xgb")
+scaler = deployment_objects.get("scaler")
+feature_names = deployment_objects.get("feature_names")
+
 # -----------------------------
-# Create SHAP explainer dynamically for XGBoost
+# Dynamically create SHAP explainer for XGBoost
 # -----------------------------
 shap_xgb = None
 if xgb_model is not None:
     try:
+        import shap
         shap_xgb = shap.TreeExplainer(xgb_model)
     except Exception as e:
         st.warning(f"SHAP explainer could not be created: {e}")
@@ -58,7 +52,10 @@ st.title("Credit Card Fraud Detection Dashboard")
 # -----------------------------
 # Model selection
 # -----------------------------
-model_choice = st.selectbox("Select model:", ["Logistic Regression", "Random Forest", "XGBoost"])
+model_choice = st.selectbox(
+    "Select model:", 
+    ["Logistic Regression", "Random Forest", "XGBoost"]
+)
 model_map = {"Logistic Regression": lr, "Random Forest": rf, "XGBoost": xgb_model}
 model = model_map[model_choice]
 
@@ -84,7 +81,7 @@ st.subheader("Input transaction data")
 input_option = st.radio("Choose input method:", ["Manual Entry", "Upload CSV"])
 
 # Features used in training
-feature_names = ['Time'] + [f'V{i}' for i in range(1, 29)] + ['Amount']
+feature_names = feature_names or ['Time'] + [f'V{i}' for i in range(1, 29)] + ['Amount']
 
 # Prepare input DataFrame
 if input_option == "Manual Entry":
@@ -98,11 +95,12 @@ else:
         st.write("Preview of uploaded data:")
         st.dataframe(input_df.head())
 
-        # Validate columns
+        # Validate required columns
         missing_cols = [c for c in feature_names if c not in input_df.columns]
         if missing_cols:
             st.error(f"Missing required columns: {missing_cols}")
             st.stop()
+
         extra_cols = [c for c in input_df.columns if c not in feature_names]
         if extra_cols:
             st.warning(f"Extra columns will be ignored: {extra_cols}")
@@ -126,7 +124,7 @@ if model_choice == "Logistic Regression":
     scaled_input = scaler.transform(model_input)
 else:
     model_input = input_df[feature_names_with_hour].copy()
-    scaled_input = model_input.values  # Raw features for RF/XGB
+    scaled_input = model_input.values  # raw features for RF/XGB
 
 # -----------------------------
 # Make predictions
@@ -152,6 +150,7 @@ if model_choice == "XGBoost" and shap_xgb is not None:
     sample_input = input_df.head(min(50, len(input_df)))
     shap_values = shap_xgb.shap_values(sample_input)
     fig, ax = plt.subplots(figsize=(10, 5))
+    import shap
     shap.summary_plot(shap_values, sample_input, show=False)
     st.pyplot(fig)
 
@@ -165,4 +164,3 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
-
