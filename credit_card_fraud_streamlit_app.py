@@ -21,7 +21,7 @@ if not pkl_path.exists():
     st.error(f"Deployment file not found! Expected at: {pkl_path.resolve()}")
     st.stop()
 
-deployment_objects = joblib.load(pkl_path)stop()
+deployment_objects = joblib.load(pkl_path)
 
 # Extract objects
 lr = deployment_objects.get("logreg")
@@ -161,4 +161,5 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
