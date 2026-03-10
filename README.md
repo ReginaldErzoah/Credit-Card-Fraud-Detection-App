@@ -11,7 +11,7 @@ The app supports multiple models:
 
 The app also provides **SHAP feature importance** plots for XGBoost to explain predictions and help understand which features contribute most to fraud risk.  
 
-For a live demo, check the Streamlit app here: [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://credit-card-fraud-streamlit-app.streamlit.app/)
+For a live demo, check the Streamlit app here: [![Open in Streamlit](link)
 
 > If the app is waking up after you open it, please wait 1–2 minutes.
 
@@ -51,6 +51,7 @@ This app is ideal for:
 ---
 
 ## Dataset
+The Credit Card Fraud Detection dataset was used. [Dataset Link](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud/data)
 The dataset used for model training is based on anonymized credit card transactions containing:
 - **Time** (seconds since first transaction)  
 - **V1–V28** (anonymized numerical features)  
@@ -68,7 +69,7 @@ The app supports new transaction data in the same feature format.
 | Programming | Python |
 | Data Handling | Pandas, NumPy |
 | Machine Learning | scikit-learn, XGBoost, imbalanced-learn |
-| Visualization | Matplotlib, SHAP |
+| Visualization | Matplotlib, Seaborn,SHAP |
 | Web App | Streamlit |
 | Deployment | Streamlit Cloud |
 | Model Persistence | joblib |
