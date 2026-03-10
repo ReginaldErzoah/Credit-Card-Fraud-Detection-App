@@ -14,17 +14,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
-# -----------------------------
-# Load deployment objects
-# -----------------------------
-BASE_DIR = Path(__file__).parent
-pkl_path = BASE_DIR / "fraud_detection_deployment_objects.pkl"
+# This will check current working directory (Streamlit Cloud)
+pkl_path = Path("fraud_detection_deployment_objects.pkl")
 
-try:
-    deployment_objects = joblib.load(pkl_path)
-except Exception as e:
-    st.error(f"Failed to load deployment objects: {e}")
+if not pkl_path.exists():
+    st.error(f"Deployment file not found! Expected at: {pkl_path.resolve()}")
     st.stop()
+
+deployment_objects = joblib.load(pkl_path)stop()
 
 # Extract objects
 lr = deployment_objects.get("logreg")
@@ -164,3 +161,4 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
