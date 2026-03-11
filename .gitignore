@@ -27,10 +27,8 @@ build/
 dist/
 *.egg-info/
 
-# Logs
+# Logs & temporary files
 *.log
-
-# Temporary files
 *.tmp
 *.swp
 
@@ -39,3 +37,4 @@ dist/
 
 # Pytest cache
 .pytest_cache/
+
