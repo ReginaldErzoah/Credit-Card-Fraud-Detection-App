@@ -5,7 +5,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Fix SHAP compatibility with NumPy
 np.int = int
 
 import joblib
@@ -280,3 +279,4 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
