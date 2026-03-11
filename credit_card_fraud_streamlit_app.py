@@ -134,31 +134,31 @@ st.pyplot(fig)
 # -----------------------------
 if model_choice == "XGBoost" and xgb_model is not None:
 
-    import shap
+    st.subheader("Global Feature Importance (SHAP)")
 
     # Limit to first 100 rows for speed
     sample_input = model_input.head(min(100, len(model_input)))
 
+    # Convert to NumPy array for caching (hashable)
+    sample_array = sample_input.values
+
+    # -----------------------------
     # Cache SHAP computation
-    @st.cache_data
-    def compute_shap(model, data):
-        explainer = shap.Explainer(model, data)
-        shap_values = explainer(data)
+    # -----------------------------
+    @st.cache_data(show_spinner=False)
+    def compute_shap_array(model, data_array):
+        explainer = shap.Explainer(model, data_array)
+        shap_values = explainer(data_array)
         return shap_values
 
-    shap_values = compute_shap(xgb_model, sample_input)
+    shap_values = compute_shap_array(xgb_model, sample_array)
 
-    # -----------------------------
-    # Global SHAP Summary
-    # -----------------------------
-    st.subheader("Global Feature Importance (SHAP)")
+    # Global SHAP summary
     fig, ax = plt.subplots(figsize=(10,5))
     shap.summary_plot(shap_values.values, sample_input, show=False)
     st.pyplot(fig)
 
-    # -----------------------------
-    # Individual Transaction SHAP
-    # -----------------------------
+    # Individual transaction explanation
     st.subheader("Explain Individual Prediction")
     transaction_index = st.number_input(
         "Select transaction index",
@@ -166,13 +166,12 @@ if model_choice == "XGBoost" and xgb_model is not None:
         max_value=len(input_df)-1,
         value=0
     )
-    transaction = model_input.iloc[[transaction_index]]
-    shap_values_single = shap.Explainer(xgb_model, sample_input)(transaction)
+    transaction_array = model_input.iloc[[transaction_index]].values
+    shap_values_single = shap.Explainer(xgb_model, sample_array)(transaction_array)
 
     fig, ax = plt.subplots(figsize=(10,4))
     shap.plots.waterfall(shap_values_single[0], show=False)
     st.pyplot(fig)
-
 # -----------------------------
 # Download Predictions
 # -----------------------------
@@ -183,3 +182,4 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
