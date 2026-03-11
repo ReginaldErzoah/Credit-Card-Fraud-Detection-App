@@ -17,6 +17,11 @@ import shap  # Modern SHAP API
 # -----------------------------
 # Load deployment objects
 # -----------------------------
+
+# Load XGBoost JSON model
+xgb_model = XGBClassifier()
+xgb_model.load_model("xgb_model.json")
+
 pkl_path = Path("fraud_detection_deployment_objects.pkl")
 if not pkl_path.exists():
     st.error(f"Deployment file not found! Expected at: {pkl_path.resolve()}")
@@ -162,3 +167,4 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
