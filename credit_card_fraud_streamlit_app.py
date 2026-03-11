@@ -1,9 +1,9 @@
 # -----------------------------
-# Import libraries
+# Patch NumPy aliases for SHAP
 # -----------------------------
 import numpy as np
 
-# --- Compatibility patch for SHAP with new NumPy versions ---
+# Add all deprecated aliases SHAP might use
 if not hasattr(np, "bool"):
     np.bool = bool
 if not hasattr(np, "int"):
@@ -15,13 +15,14 @@ if not hasattr(np, "object"):
 if not hasattr(np, "str"):
     np.str = str
 
+# Now import all other libraries
 import streamlit as st
 import pandas as pd
 import joblib
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from pathlib import Path
-
-# sklearn & xgboost classes used in deployment objects
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
@@ -289,6 +290,7 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
 
 
