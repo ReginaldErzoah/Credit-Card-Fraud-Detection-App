@@ -12,12 +12,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
-import shap  
+import shap  # Modern SHAP API
 
 # -----------------------------
 # Load deployment objects
 # -----------------------------
-
 # Load XGBoost JSON model
 xgb_model = XGBClassifier()
 xgb_model.load_model("xgb_model.json")
@@ -131,18 +130,16 @@ ax.set_title("Distribution of Fraud Predictions")
 st.pyplot(fig)
 
 # -----------------------------
-# SHAP Explainability (Modern API)
+# SHAP Explainability (Optimized)
 # -----------------------------
 if model_choice == "XGBoost" and xgb_model is not None:
 
-    st.subheader("Global Feature Importance (SHAP)")
+    import shap
 
     # Limit to first 100 rows for speed
     sample_input = model_input.head(min(100, len(model_input)))
 
-    # -----------------------------
-    # Cache the SHAP computation
-    # -----------------------------
+    # Cache SHAP computation
     @st.cache_data
     def compute_shap(model, data):
         explainer = shap.Explainer(model, data)
@@ -151,9 +148,31 @@ if model_choice == "XGBoost" and xgb_model is not None:
 
     shap_values = compute_shap(xgb_model, sample_input)
 
+    # -----------------------------
+    # Global SHAP Summary
+    # -----------------------------
+    st.subheader("Global Feature Importance (SHAP)")
     fig, ax = plt.subplots(figsize=(10,5))
     shap.summary_plot(shap_values.values, sample_input, show=False)
     st.pyplot(fig)
+
+    # -----------------------------
+    # Individual Transaction SHAP
+    # -----------------------------
+    st.subheader("Explain Individual Prediction")
+    transaction_index = st.number_input(
+        "Select transaction index",
+        min_value=0,
+        max_value=len(input_df)-1,
+        value=0
+    )
+    transaction = model_input.iloc[[transaction_index]]
+    shap_values_single = shap.Explainer(xgb_model, sample_input)(transaction)
+
+    fig, ax = plt.subplots(figsize=(10,4))
+    shap.plots.waterfall(shap_values_single[0], show=False)
+    st.pyplot(fig)
+
 # -----------------------------
 # Download Predictions
 # -----------------------------
@@ -164,6 +183,3 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
-
-
-
