@@ -134,28 +134,26 @@ st.pyplot(fig)
 # SHAP Explainability (Modern API)
 # -----------------------------
 if model_choice == "XGBoost" and xgb_model is not None:
+
     st.subheader("Global Feature Importance (SHAP)")
-    shap_explainer = shap.Explainer(xgb_model, model_input)
-    shap_values = shap_explainer(model_input)
+
+    # Limit to first 100 rows for speed
+    sample_input = model_input.head(min(100, len(model_input)))
+
+    # -----------------------------
+    # Cache the SHAP computation
+    # -----------------------------
+    @st.cache_data
+    def compute_shap(model, data):
+        explainer = shap.Explainer(model, data)
+        shap_values = explainer(data)
+        return shap_values
+
+    shap_values = compute_shap(xgb_model, sample_input)
 
     fig, ax = plt.subplots(figsize=(10,5))
-    shap.summary_plot(shap_values.values, model_input, show=False)
+    shap.summary_plot(shap_values.values, sample_input, show=False)
     st.pyplot(fig)
-
-    st.subheader("Explain Individual Prediction")
-    transaction_index = st.number_input(
-        "Select transaction index",
-        min_value=0,
-        max_value=len(input_df)-1,
-        value=0
-    )
-    transaction = model_input.iloc[[transaction_index]]
-    shap_values_single = shap_explainer(transaction)
-
-    fig, ax = plt.subplots(figsize=(10,4))
-    shap.plots.waterfall(shap_values_single[0], show=False)
-    st.pyplot(fig)
-
 # -----------------------------
 # Download Predictions
 # -----------------------------
@@ -166,5 +164,6 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
 
