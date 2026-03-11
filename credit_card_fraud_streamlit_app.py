@@ -12,7 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
-import shap  # Modern SHAP API
+import shap  
 
 # -----------------------------
 # Load deployment objects
@@ -30,7 +30,6 @@ if not pkl_path.exists():
 deployment_objects = joblib.load(pkl_path)
 lr = deployment_objects.get("logreg")
 rf = deployment_objects.get("rf")
-xgb_model = deployment_objects.get("xgb")
 scaler = deployment_objects.get("scaler")
 feature_names = deployment_objects.get("feature_names") or ['Time'] + [f'V{i}' for i in range(1,29)] + ['Amount']
 
@@ -167,4 +166,5 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
