@@ -11,7 +11,7 @@ The app supports multiple models:
 
 The app also provides **SHAP feature importance** plots for XGBoost to explain predictions and help understand which features contribute most to fraud risk.  
 
-For a live demo, check the Streamlit app here: [![Open in Streamlit](link) (Streamlit App still under construction).
+For a live demo, check the Streamlit app here: [Open in Streamlit](https://creditcardfrauddetectionapp1.streamlit.app/) (Streamlit App still under construction).
 
 The project demonstrates:
 - Python for **data preprocessing** and ML modeling  
