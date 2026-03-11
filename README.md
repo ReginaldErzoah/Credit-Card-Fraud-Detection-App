@@ -11,9 +11,7 @@ The app supports multiple models:
 
 The app also provides **SHAP feature importance** plots for XGBoost to explain predictions and help understand which features contribute most to fraud risk.  
 
-For a live demo, check the Streamlit app here: [![Open in Streamlit](link)
-
-> If the app is waking up after you open it, please wait 1–2 minutes.
+For a live demo, check the Streamlit app here: [![Open in Streamlit](link) (Streamlit App still under construction).
 
 The project demonstrates:
 - Python for **data preprocessing** and ML modeling  
