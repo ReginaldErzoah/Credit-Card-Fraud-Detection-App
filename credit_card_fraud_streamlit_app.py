@@ -2,8 +2,6 @@
 # Import libraries
 # -----------------------------
 import numpy as np
-import streamlit as st
-import pandas as pd
 
 # --- Compatibility patch for SHAP with new NumPy versions ---
 if not hasattr(np, "bool"):
@@ -16,7 +14,9 @@ if not hasattr(np, "object"):
     np.object = object
 if not hasattr(np, "str"):
     np.str = str
-    
+
+import streamlit as st
+import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -289,6 +289,7 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
 
 
