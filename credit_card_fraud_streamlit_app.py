@@ -4,7 +4,6 @@
 import numpy as np
 import streamlit as st
 import pandas as pd
-import numpy as np
 
 # --- Compatibility patch for SHAP with new NumPy versions ---
 if not hasattr(np, "bool"):
@@ -290,6 +289,7 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
 
 
