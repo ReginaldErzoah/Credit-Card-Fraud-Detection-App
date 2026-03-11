@@ -130,7 +130,7 @@ ax.set_title("Distribution of Fraud Predictions")
 st.pyplot(fig)
 
 # -----------------------------
-# SHAP Explainability (Optimized)
+# SHAP Explainability (Optimized, no caching)
 # -----------------------------
 if model_choice == "XGBoost" and xgb_model is not None:
 
@@ -139,21 +139,11 @@ if model_choice == "XGBoost" and xgb_model is not None:
     # Limit to first 100 rows for speed
     sample_input = model_input.head(min(100, len(model_input)))
 
-    # Convert to NumPy array for caching (hashable)
-    sample_array = sample_input.values
+    # Compute SHAP values (no caching)
+    explainer = shap.Explainer(xgb_model, sample_input)
+    shap_values = explainer(sample_input)
 
-    # -----------------------------
-    # Cache SHAP computation
-    # -----------------------------
-    @st.cache_data(show_spinner=False)
-    def compute_shap_array(model, data_array):
-        explainer = shap.Explainer(model, data_array)
-        shap_values = explainer(data_array)
-        return shap_values
-
-    shap_values = compute_shap_array(xgb_model, sample_array)
-
-    # Global SHAP summary
+    # Global SHAP summary plot
     fig, ax = plt.subplots(figsize=(10,5))
     shap.summary_plot(shap_values.values, sample_input, show=False)
     st.pyplot(fig)
@@ -166,8 +156,8 @@ if model_choice == "XGBoost" and xgb_model is not None:
         max_value=len(input_df)-1,
         value=0
     )
-    transaction_array = model_input.iloc[[transaction_index]].values
-    shap_values_single = shap.Explainer(xgb_model, sample_array)(transaction_array)
+    transaction = model_input.iloc[[transaction_index]]
+    shap_values_single = explainer(transaction)
 
     fig, ax = plt.subplots(figsize=(10,4))
     shap.plots.waterfall(shap_values_single[0], show=False)
@@ -182,4 +172,5 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
