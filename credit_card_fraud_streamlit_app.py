@@ -1,11 +1,14 @@
 # -----------------------------
 # Import libraries
 # -----------------------------
+import numpy as np
 import streamlit as st
 import pandas as pd
 import numpy as np
 
-np.int = int
+# Fix for SHAP + NumPy compatibility
+if not hasattr(np, "int"):
+    np.int = int
 
 import joblib
 import matplotlib.pyplot as plt
@@ -279,4 +282,5 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
+
 
