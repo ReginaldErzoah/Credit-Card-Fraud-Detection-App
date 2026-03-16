@@ -1,6 +1,4 @@
-# -----------------------------
 # Import libraries
-# -----------------------------
 import streamlit as st
 import pandas as pd
 import joblib
@@ -12,12 +10,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
-import shap  # Modern SHAP API
+import shap  
 
-# -----------------------------
 # Load deployment objects
-# -----------------------------
-# Load XGBoost JSON model
 xgb_model = XGBClassifier()
 xgb_model.load_model("xgb_model.json")
 
@@ -32,25 +27,22 @@ rf = deployment_objects.get("rf")
 scaler = deployment_objects.get("scaler")
 feature_names = deployment_objects.get("feature_names") or ['Time'] + [f'V{i}' for i in range(1,29)] + ['Amount']
 
-# -----------------------------
+
 # App title
-# -----------------------------
 st.title("Credit Card Fraud Detection Dashboard")
 st.write("""
 This application predicts whether a credit card transaction is fraudulent
 using multiple machine learning models and provides explainability using SHAP.
 """)
 
-# -----------------------------
+
 # Model selection
-# -----------------------------
 model_choice = st.selectbox("Select model:", ["Logistic Regression", "Random Forest", "XGBoost"])
 model_map = {"Logistic Regression": lr, "Random Forest": rf, "XGBoost": xgb_model}
 model = model_map[model_choice]
 
-# -----------------------------
+
 # Threshold input
-# -----------------------------
 threshold_input = st.text_input("Set prediction threshold (0.0 - 1.0)", value="0.5")
 try:
     threshold = float(threshold_input)
@@ -62,9 +54,7 @@ except ValueError:
     st.stop()
 st.write(f"Current threshold: {threshold:.6f}")
 
-# -----------------------------
 # Input method
-# -----------------------------
 st.subheader("Input Transaction Data")
 input_option = st.radio("Choose input method:", ["Manual Entry", "Upload CSV"])
 
@@ -88,16 +78,13 @@ else:
         st.warning(f"Extra columns will be ignored: {extra_cols}")
     input_df = input_df[feature_names].astype(float)
 
-# -----------------------------
 # Feature engineering
-# -----------------------------
 input_df["Hour"] = (input_df["Time"] // 3600) % 24
 feature_names_with_hour = feature_names + ["Hour"]
 input_df = input_df[feature_names_with_hour]
 
-# -----------------------------
+
 # Prepare model input
-# -----------------------------
 if model_choice == "Logistic Regression":
     model_input = input_df[feature_names]
     scaled_input = scaler.transform(model_input)
@@ -105,9 +92,8 @@ else:
     model_input = input_df[feature_names_with_hour]
     scaled_input = model_input.values
 
-# -----------------------------
+
 # Make predictions
-# -----------------------------
 pred_probs = model.predict_proba(scaled_input)[:, 1]
 pred_classes = (pred_probs >= threshold).astype(int)
 
@@ -118,9 +104,8 @@ results["Predicted_Class"] = pred_classes
 st.subheader("Prediction Results")
 st.dataframe(results)
 
-# -----------------------------
+
 # Fraud Probability Distribution
-# -----------------------------
 st.subheader("Fraud Probability Distribution")
 fig, ax = plt.subplots()
 ax.hist(pred_probs, bins=30)
@@ -129,9 +114,8 @@ ax.set_ylabel("Number of Transactions")
 ax.set_title("Distribution of Fraud Predictions")
 st.pyplot(fig)
 
-# -----------------------------
+
 # SHAP Explainability (Optimized, no caching)
-# -----------------------------
 if model_choice == "XGBoost" and xgb_model is not None:
 
     st.subheader("Global Feature Importance (SHAP)")
@@ -162,9 +146,9 @@ if model_choice == "XGBoost" and xgb_model is not None:
     fig, ax = plt.subplots(figsize=(10,4))
     shap.plots.waterfall(shap_values_single[0], show=False)
     st.pyplot(fig)
-# -----------------------------
+
+
 # Download Predictions
-# -----------------------------
 csv = results.to_csv(index=False).encode()
 st.download_button(
     label="Download Predictions as CSV",
