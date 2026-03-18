@@ -27,7 +27,6 @@ rf = deployment_objects.get("rf")
 scaler = deployment_objects.get("scaler")
 feature_names = deployment_objects.get("feature_names") or ['Time'] + [f'V{i}' for i in range(1,29)] + ['Amount']
 
-
 # App title
 st.title("Credit Card Fraud Detection Dashboard")
 st.write("""
@@ -35,12 +34,10 @@ This application predicts whether a credit card transaction is fraudulent
 using multiple machine learning models and provides explainability using SHAP.
 """)
 
-
 # Model selection
 model_choice = st.selectbox("Select model:", ["Logistic Regression", "Random Forest", "XGBoost"])
 model_map = {"Logistic Regression": lr, "Random Forest": rf, "XGBoost": xgb_model}
 model = model_map[model_choice]
-
 
 # Threshold input
 threshold_input = st.text_input("Set prediction threshold (0.0 - 1.0)", value="0.5")
@@ -78,20 +75,16 @@ else:
         st.warning(f"Extra columns will be ignored: {extra_cols}")
     input_df = input_df[feature_names].astype(float)
 
-# Feature engineering
+# Feature engineering for visualization only
 input_df["Hour"] = (input_df["Time"] // 3600) % 24
 feature_names_with_hour = feature_names + ["Hour"]
-input_df = input_df[feature_names_with_hour]
 
-
-# Prepare model input
+# Prepare model input (only original features for predictions)
+model_input = input_df[feature_names]
 if model_choice == "Logistic Regression":
-    model_input = input_df[feature_names]
     scaled_input = scaler.transform(model_input)
 else:
-    model_input = input_df[feature_names_with_hour]
     scaled_input = model_input.values
-
 
 # Make predictions
 pred_probs = model.predict_proba(scaled_input)[:, 1]
@@ -104,7 +97,6 @@ results["Predicted_Class"] = pred_classes
 st.subheader("Prediction Results")
 st.dataframe(results)
 
-
 # Fraud Probability Distribution
 st.subheader("Fraud Probability Distribution")
 fig, ax = plt.subplots()
@@ -114,22 +106,19 @@ ax.set_ylabel("Number of Transactions")
 ax.set_title("Distribution of Fraud Predictions")
 st.pyplot(fig)
 
-
 # SHAP Explainability (Optimized, no caching)
 if model_choice == "XGBoost" and xgb_model is not None:
-
     st.subheader("Global Feature Importance (SHAP)")
 
-    # Limit to first 100 rows for speed
-    sample_input = model_input.head(min(100, len(model_input)))
+    # Use feature_names_with_hour only for SHAP if you want to explain Hour
+    shap_input = input_df[feature_names_with_hour].head(min(100, len(input_df)))
 
-    # Compute SHAP values (no caching)
-    explainer = shap.Explainer(xgb_model, sample_input)
-    shap_values = explainer(sample_input)
+    explainer = shap.Explainer(xgb_model, shap_input[feature_names])  # model trained on original features
+    shap_values = explainer(shap_input[feature_names])
 
     # Global SHAP summary plot
     fig, ax = plt.subplots(figsize=(10,5))
-    shap.summary_plot(shap_values.values, sample_input, show=False)
+    shap.summary_plot(shap_values.values, shap_input[feature_names], show=False)
     st.pyplot(fig)
 
     # Individual transaction explanation
@@ -147,7 +136,6 @@ if model_choice == "XGBoost" and xgb_model is not None:
     shap.plots.waterfall(shap_values_single[0], show=False)
     st.pyplot(fig)
 
-
 # Download Predictions
 csv = results.to_csv(index=False).encode()
 st.download_button(
@@ -156,5 +144,3 @@ st.download_button(
     file_name="fraud_predictions.csv",
     mime="text/csv"
 )
-
-
