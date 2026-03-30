@@ -28,7 +28,7 @@ scaler = deployment_objects.get("scaler")
 feature_names = deployment_objects.get("feature_names") or ['Time'] + [f'V{i}' for i in range(1,29)] + ['Amount']
 
 # App title
-st.title("Credit Card Fraud Detection Dashboard")
+st.title("Credit Card Fraud Detection App")
 st.write("""
 This application predicts whether a credit card transaction is fraudulent
 using multiple machine learning models and provides explainability using SHAP.
