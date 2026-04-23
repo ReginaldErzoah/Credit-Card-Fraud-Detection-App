@@ -79,3 +79,6 @@ The app supports new transaction data in the same feature format.
 
 ## Update & Version Log
 - **Version 1.0** (March 2026): Initial release with multi-model prediction, CSV upload, manual entry, SHAP visualization for XGBoost, and download functionality
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
