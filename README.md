@@ -58,7 +58,7 @@ The dataset used for model training is based on anonymized credit card transacti
 - **Amount** (transaction amount)  
 - **Fraud Label** (0 = Non-Fraud, 1 = Fraud)
 
-The app supports new transaction data in the same feature format.  
+The app supports new transaction data in the same feature format. 
 
 ---
 
