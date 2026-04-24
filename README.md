@@ -16,7 +16,7 @@ For a live demo, check the Streamlit app here: [![Open in Streamlit](https://sta
 
 The project demonstrates:
 - Python for **data preprocessing** and ML modeling  
-- Pandas & NumPy for **data handling**  
+- Pandas & NumPy for **data handling** 
 - Matplotlib & SHAP for **visual explanations**  
 - Streamlit for **interactive deployment**
 
